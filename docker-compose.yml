@@ -1,0 +1,103 @@
+version: '3'
+
+services:
+  db:
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password123
+    env_file:
+      - db.env
+
+  app:
+    build: ./app
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+    environment:
+      - MYSQL_HOST=db
+    env_file:
+      - db.env
+    depends_on:
+      - db
+
+  web:
+    build: ./web
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html:ro
+    environment:
+      - VIRTUAL_HOST=127.0.0.1
+    depends_on:
+      - app
+    networks:
+      - proxy-net
+      - default
+
+  proxy:
+    build: ./proxy
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - certs:/etc/nginx/certs:ro
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - proxy-net
+    depends_on:
+      - omgwtfssl
+
+  omgwtfssl:
+    image: paulczar/omgwtfssl
+    restart: "no"
+    volumes:
+      - certs:/certs
+    environment:
+      - SSL_SUBJECT=127.0.0.1
+      - CA_SUBJECT=nextcloud@127.0.0.1
+      - SSL_KEY=/certs/127.0.0.1.key
+      - SSL_CSR=/certs/127.0.0.1.csr
+      - SSL_CERT=/certs/127.0.0.1.crt
+    networks:
+      - proxy-net
+
+volumes:
+  db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/nextcloud/db
+  nextcloud:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/nextcloud/data
+  certs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/nextcloud/certs
+  vhost.d:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/nextcloud/vhost
+  html:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/nextcloud/html
+
+networks:
+  proxy-net:
