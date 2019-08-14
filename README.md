@@ -7,6 +7,12 @@ docker-compose for nextcloud fpm with mariadb and nginx proxy as well as self si
 3) Update volume path in docker-compose.yml (/var/nextcloud)
 4) Update max upload size in proxy/uploadsize.conf and web/nginx.conf (25 GB)
 
+#### Custom setup script
+Custom setup script is automatically copied to app container image. It can be run by executing:
+```bash
+docker-compose exec --user www-data app custom_setup
+```
+
 ### Running
 ```bash
 docker-compose build --pull
