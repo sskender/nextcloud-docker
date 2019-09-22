@@ -7,8 +7,6 @@ services:
     restart: always
     volumes:
       - db:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=password123
     env_file:
       - db.env
 
@@ -29,8 +27,8 @@ services:
     restart: always
     volumes:
       - nextcloud:/var/www/html:ro
-    environment:
-      - VIRTUAL_HOST=127.0.0.1
+    env_file:
+      - nginx.env
     depends_on:
       - app
     networks:
@@ -58,12 +56,8 @@ services:
     restart: "no"
     volumes:
       - certs:/certs
-    environment:
-      - SSL_SUBJECT=127.0.0.1
-      - CA_SUBJECT=nextcloud@127.0.0.1
-      - SSL_KEY=/certs/127.0.0.1.key
-      - SSL_CSR=/certs/127.0.0.1.csr
-      - SSL_CERT=/certs/127.0.0.1.crt
+    env_file:
+      - proxy.env
     networks:
       - proxy-net
 
@@ -73,31 +67,31 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /var/nextcloud/db
+      device: /var/pool/nextcloud/db
   nextcloud:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /var/nextcloud/data
+      device: /var/pool/nextcloud/data
   certs:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /var/nextcloud/certs
+      device: /var/pool/nextcloud/certs
   vhost.d:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /var/nextcloud/vhost
+      device: /var/pool/nextcloud/vhost
   html:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /var/nextcloud/html
+      device: /var/pool/nextcloud/html
 
 networks:
   proxy-net:
