@@ -2,6 +2,7 @@ version: '3'
 
 services:
   db:
+    container_name: nextcloud-mariadb
     build: ./db
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     restart: always
@@ -11,6 +12,7 @@ services:
       - db.env
 
   app:
+    container_name: nextcloud-app
     build: ./app
     restart: always
     volumes:
@@ -23,6 +25,7 @@ services:
       - db
 
   web:
+    container_name: nextcloud-nginx
     build: ./web
     restart: always
     volumes:
@@ -36,6 +39,7 @@ services:
       - default
 
   proxy:
+    container_name: nextcloud-proxy
     build: ./proxy
     restart: always
     ports:
@@ -52,6 +56,7 @@ services:
       - omgwtfssl
 
   omgwtfssl:
+    container_name: nextcloud-ssl
     image: paulczar/omgwtfssl
     restart: "no"
     volumes:
