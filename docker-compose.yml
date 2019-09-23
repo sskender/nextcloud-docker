@@ -57,7 +57,7 @@ services:
     volumes:
       - certs:/certs
     env_file:
-      - proxy.env
+      - sslcert.env
     networks:
       - proxy-net
 
