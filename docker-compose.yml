@@ -76,12 +76,16 @@ services:
       - proxy-net
 
 volumes:
+  # database volume
+  # use a high performance drive
   db:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: /var/pool/nextcloud/db
+  # nextcloud data volume
+  # use drive pool, this will be huge
   nextcloud:
     driver: local
     driver_opts:
@@ -106,6 +110,8 @@ volumes:
       type: none
       o: bind
       device: /var/pool/nextcloud/html
+  # redis cache volume
+  # definitely use a high performance drive
   cache:
 
 networks:
