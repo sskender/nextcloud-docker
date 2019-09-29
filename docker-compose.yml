@@ -11,6 +11,13 @@ services:
     env_file:
       - db.env
 
+  redis:
+    container_name: nextcloud-redis
+    image: redis:alpine
+    restart: always
+    volumes:
+      - cache:/data
+
   app:
     container_name: nextcloud-app
     build: ./app
@@ -19,10 +26,12 @@ services:
       - nextcloud:/var/www/html
     environment:
       - MYSQL_HOST=db
+      - REDIS_HOST=redis
     env_file:
       - db.env
     depends_on:
       - db
+      - redis
 
   web:
     container_name: nextcloud-nginx
@@ -97,6 +106,7 @@ volumes:
       type: none
       o: bind
       device: /var/pool/nextcloud/html
+  cache:
 
 networks:
   proxy-net:
