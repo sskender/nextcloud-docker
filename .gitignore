@@ -1,3 +1,6 @@
 db.env
+db.env.server
 nginx.env
+nginx.env.server
 sslcert.env
+sslcert.env.server
