@@ -28,6 +28,16 @@ services:
     volumes:
       - nextcloud:/var/www/html
 
+  cron:
+    container_name: nextcloud-cron
+    depends_on:
+      - db
+    entrypoint: /cron.sh
+    image: nextcloud:fpm-alpine
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+
   web:
     container_name: nextcloud-nginx
     build: ./web
