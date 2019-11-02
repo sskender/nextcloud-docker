@@ -20,6 +20,7 @@ services:
     depends_on:
       - db
     environment:
+      - MYSQL_DATABASE=nextcloud
       - MYSQL_HOST=db
     env_file:
       - db.env
