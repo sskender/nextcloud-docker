@@ -87,7 +87,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /var/pool/nextcloud/db
+      device: /var/turbo/nextcloud/db
   nextcloud:
     driver: local
     driver_opts:
