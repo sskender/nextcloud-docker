@@ -1,70 +1,75 @@
 version: '3'
 
+
 services:
   db:
     container_name: nextcloud-mariadb
     build: ./db
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    environment:
+      - MYSQL_DATABASE=nextcloud
+    env_file:
+      - db.env
     restart: always
     volumes:
       - db:/var/lib/mysql
-    env_file:
-      - db.env
 
   app:
     container_name: nextcloud-app
     build: ./app
-    restart: always
-    volumes:
-      - nextcloud:/var/www/html
+    depends_on:
+      - db
     environment:
       - MYSQL_HOST=db
     env_file:
       - db.env
-    depends_on:
-      - db
+      - nginx.env
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
 
   web:
     container_name: nextcloud-nginx
     build: ./web
-    restart: always
-    volumes:
-      - nextcloud:/var/www/html:ro
-    env_file:
-      - nginx.env
     depends_on:
       - app
+    env_file:
+      - nginx.env
     networks:
       - proxy-net
       - default
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html:ro
 
   proxy:
     container_name: nextcloud-proxy
     build: ./proxy
-    restart: always
+    depends_on:
+      - omgwtfssl
+    networks:
+      - proxy-net
     ports:
       - 80:80
       - 443:443
+    restart: always
     volumes:
       - certs:/etc/nginx/certs:ro
       - vhost.d:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
-    networks:
-      - proxy-net
-    depends_on:
-      - omgwtfssl
 
   omgwtfssl:
     container_name: nextcloud-ssl
+    env_file:
+      - sslcert.env
     image: paulczar/omgwtfssl
+    networks:
+      - proxy-net
     restart: "no"
     volumes:
       - certs:/certs
-    env_file:
-      - sslcert.env
-    networks:
-      - proxy-net
+
 
 volumes:
   db:
@@ -97,6 +102,7 @@ volumes:
       type: none
       o: bind
       device: /var/pool/nextcloud/html
+
 
 networks:
   proxy-net:
