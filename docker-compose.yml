@@ -15,14 +15,23 @@ services:
       - db:/var/lib/mysql
       - dbtmp:/tmp
 
+  redis:
+    container_name: nextcloud-redis
+    image: redis:alpine
+    restart: always
+    volumes:
+      - rediscache:/data
+
   app:
     container_name: nextcloud-app
     build: ./app
     depends_on:
       - db
+      - redis
     environment:
       - MYSQL_DATABASE=nextcloud
       - MYSQL_HOST=db
+      - REDIS_HOST=redis
     env_file:
       - db.env
       - nginx.env
@@ -34,6 +43,7 @@ services:
     container_name: nextcloud-cron
     depends_on:
       - db
+      - redis
     entrypoint: /cron.sh
     image: nextcloud:fpm-alpine
     restart: always
@@ -84,6 +94,7 @@ services:
 
 
 volumes:
+  # database volumes
   db:
     driver: local
     driver_opts:
@@ -96,6 +107,14 @@ volumes:
       type: none
       o: bind
       device: /tmp/nextcloud/dbcache
+  # redis cache volume
+  rediscache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /tmp/nextcloud/rediscache
+  # nextcloud data volume
   nextcloud:
     driver: local
     driver_opts:
