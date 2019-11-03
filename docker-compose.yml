@@ -12,8 +12,8 @@ services:
       - db.env
     restart: always
     volumes:
-      - dbdata:/var/lib/mysql
-      - dbtemp:/tmp
+      - db:/var/lib/mysql
+      - dbtmp:/tmp
 
   app:
     container_name: nextcloud-app
@@ -84,13 +84,13 @@ services:
 
 
 volumes:
-  dbdata:
+  db:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: /var/pool/nextcloud/db
-  dbtemp:
+  dbtmp:
     driver: local
     driver_opts:
       type: none
