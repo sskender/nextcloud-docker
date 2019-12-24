@@ -84,8 +84,10 @@ services:
   proxy:
     container_name: nextcloud-proxy
     build: ./proxy
-    depends_on:
-      - omgwtfssl
+    #depends_on:
+    #  - omgwtfssl
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     networks:
       - proxy-net
     ports:
@@ -100,6 +102,7 @@ services:
 
   omgwtfssl:
     container_name: nextcloud-ssl
+    entrypoint: ["echo", "service omgwtfssl disabled"]
     env_file:
       - ./env/sslcert.env
     image: paulczar/omgwtfssl
@@ -108,6 +111,20 @@ services:
     restart: "no"
     volumes:
       - certs:/certs
+
+  letsencrypt-companion:
+    container_name: nextcloud-letsencrypt
+    depends_on:
+      - proxy
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    networks:
+      - proxy-net
+    restart: always
+    volumes:
+      - certs:/etc/nginx/certs
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
 
 volumes:
