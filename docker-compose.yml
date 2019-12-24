@@ -50,7 +50,7 @@ services:
       - SMTP_PORT=25
     env_file:
       - ./env/db.env
-      - ./env/nginx.env
+      - ./env/proxy.env
       - ./env/smtp.env
     restart: always
     volumes:
@@ -73,7 +73,7 @@ services:
     depends_on:
       - app
     env_file:
-      - ./env/nginx.env
+      - ./env/proxy.env
     networks:
       - proxy-net
       - default
@@ -104,7 +104,7 @@ services:
     container_name: nextcloud-ssl
     entrypoint: ["echo", "service omgwtfssl disabled"]
     env_file:
-      - ./env/sslcert.env
+      - ./env/proxy.env
     image: paulczar/omgwtfssl
     networks:
       - proxy-net
