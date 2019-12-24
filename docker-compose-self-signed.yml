@@ -1,0 +1,177 @@
+version: '3'
+
+
+services:
+
+  db:
+    container_name: nextcloud-mariadb
+    build: ./db
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    environment:
+      - MYSQL_DATABASE=nextcloud
+    env_file:
+      - ./env/db.env
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+      - dbtmp:/tmp
+
+  redis:
+    container_name: nextcloud-redis
+    image: redis:alpine
+    restart: always
+    volumes:
+      - rediscache:/data
+
+  postfix:
+    container_name: nextcloud-postfix
+    env_file:
+      - ./env/smtp.env
+    image: catatnight/postfix
+    restart: always
+    volumes:
+      - mail:/var/spool/postfix
+
+  app:
+    container_name: nextcloud-app
+    build: ./app
+    depends_on:
+      - db
+      - redis
+    environment:
+      # database
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_HOST=db
+      # redis
+      - REDIS_HOST=redis
+      # smtp
+      - SMTP_AUTHTYPE=LOGIN
+      - SMTP_HOST=postfix
+      - SMTP_PORT=25
+    env_file:
+      - ./env/db.env
+      - ./env/nginx.env
+      - ./env/smtp.env
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+
+  cron:
+    container_name: nextcloud-cron
+    depends_on:
+      - db
+      - redis
+    entrypoint: /cron.sh
+    image: nextcloud:fpm-alpine
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+
+  web:
+    container_name: nextcloud-nginx
+    build: ./web
+    depends_on:
+      - app
+    env_file:
+      - ./env/nginx.env
+    networks:
+      - proxy-net
+      - default
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html:ro
+
+  proxy:
+    container_name: nextcloud-proxy
+    build: ./proxy
+    depends_on:
+      - omgwtfssl
+    networks:
+      - proxy-net
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    volumes:
+      - certs:/etc/nginx/certs:ro
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  omgwtfssl:
+    container_name: nextcloud-ssl
+    env_file:
+      - ./env/sslcert.env
+    image: paulczar/omgwtfssl
+    networks:
+      - proxy-net
+    restart: "no"
+    volumes:
+      - certs:/certs
+
+
+volumes:
+
+  # database volumes
+  db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/pool/nextcloud/db
+
+  dbtmp:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/ramdisk/dbcache
+
+  # redis cache volume
+  rediscache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/ramdisk/rediscache
+
+  # postfix mails
+  mail:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/pool/nextcloud/mail
+
+  # nextcloud data volume
+  nextcloud:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/pool/nextcloud/data
+
+  certs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/pool/nextcloud/certs
+
+  vhost.d:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/pool/nextcloud/vhost
+
+  html:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/pool/nextcloud/html
+
+
+networks:
+  proxy-net:
