@@ -23,6 +23,15 @@ services:
     volumes:
       - rediscache:/data
 
+  postfix:
+    container_name: nextcloud-postfix
+    env_file:
+      - smtp.env
+    image: catatnight/postfix
+    restart: always
+    volumes:
+      - mail:/var/spool/postfix
+
   app:
     container_name: nextcloud-app
     build: ./app
@@ -30,12 +39,19 @@ services:
       - db
       - redis
     environment:
+      # database
       - MYSQL_DATABASE=nextcloud
       - MYSQL_HOST=db
+      # redis
       - REDIS_HOST=redis
+      # smtp
+      - SMTP_AUTHTYPE=LOGIN
+      - SMTP_HOST=postfix
+      - SMTP_PORT=25
     env_file:
       - db.env
       - nginx.env
+      - smtp.env
     restart: always
     volumes:
       - nextcloud:/var/www/html
@@ -118,6 +134,14 @@ volumes:
       type: none
       o: bind
       device: /var/ramdisk/rediscache
+
+  # postfix mails
+  mail:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/pool/nextcloud/mail
 
   # nextcloud data volume
   nextcloud:

@@ -18,7 +18,7 @@ Values that are ought to be changed before running:
 ### Running
 Make sure docker volume paths exist in the host sytem. If the default configuration is used, a directory tree can be created with the following commands:
 ```bash
-mkdir -p /var/pool/nextcloud/{db,data,certs,vhost,html}
+mkdir -p /var/pool/nextcloud/{db,data,certs,vhost,html,mail}
 mkdir -p /var/ramdisk/{dbcache,rediscache}
 ```
 

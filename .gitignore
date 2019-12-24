@@ -4,3 +4,5 @@ nginx.env
 nginx.env.server
 sslcert.env
 sslcert.env.server
+smtp.env
+smtp.env.server
