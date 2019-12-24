@@ -9,9 +9,9 @@ MariaDB and PHP-FPM are configured to run on server with 1 CPU (4 threads) and 1
 
 ### Before running
 Values that are ought to be changed before running:
-1) Update database passwords in [db.env](db.env.example) (*default: password123*)
-2) Update domains in [nginx.env](nginx.env.example) (*default: 127.0.0.1*)
-3) Update ssl certificates to match your domain name in [sslcert.env](sslcert.env.example) (*default: 127.0.0.1*)
+1) Update database passwords in [db.env](env/db.env.example) (*default: password123*)
+2) Update domains in [nginx.env](env/nginx.env.example) (*default: 127.0.0.1*)
+3) Update ssl certificates to match your domain name in [sslcert.env](env/sslcert.env.example) (*default: 127.0.0.1*)
 4) Update volume paths for each service in [docker-compose.yml](docker-compose.yml) (*default: /var/pool/nextcloud*)
 5) Update max upload size in [proxy/uploadsize.conf](proxy/uploadsize.conf) and [web/nginx.conf](web/nginx.conf) (*default: 25 GB*)
 

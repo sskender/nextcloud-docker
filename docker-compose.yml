@@ -10,7 +10,7 @@ services:
     environment:
       - MYSQL_DATABASE=nextcloud
     env_file:
-      - db.env
+      - ./env/db.env
     restart: always
     volumes:
       - db:/var/lib/mysql
@@ -26,7 +26,7 @@ services:
   postfix:
     container_name: nextcloud-postfix
     env_file:
-      - smtp.env
+      - ./env/smtp.env
     image: catatnight/postfix
     restart: always
     volumes:
@@ -49,9 +49,9 @@ services:
       - SMTP_HOST=postfix
       - SMTP_PORT=25
     env_file:
-      - db.env
-      - nginx.env
-      - smtp.env
+      - ./env/db.env
+      - ./env/nginx.env
+      - ./env/smtp.env
     restart: always
     volumes:
       - nextcloud:/var/www/html
@@ -73,7 +73,7 @@ services:
     depends_on:
       - app
     env_file:
-      - nginx.env
+      - ./env/nginx.env
     networks:
       - proxy-net
       - default
@@ -101,7 +101,7 @@ services:
   omgwtfssl:
     container_name: nextcloud-ssl
     env_file:
-      - sslcert.env
+      - ./env/sslcert.env
     image: paulczar/omgwtfssl
     networks:
       - proxy-net
