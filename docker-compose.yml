@@ -2,6 +2,7 @@ version: '3'
 
 
 services:
+
   db:
     container_name: nextcloud-mariadb
     build: ./db
@@ -94,6 +95,7 @@ services:
 
 
 volumes:
+
   # database volumes
   db:
     driver: local
@@ -101,12 +103,14 @@ volumes:
       type: none
       o: bind
       device: /var/pool/nextcloud/db
+
   dbtmp:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: /var/ramdisk/dbcache
+
   # redis cache volume
   rediscache:
     driver: local
@@ -114,6 +118,7 @@ volumes:
       type: none
       o: bind
       device: /var/ramdisk/rediscache
+
   # nextcloud data volume
   nextcloud:
     driver: local
@@ -121,18 +126,21 @@ volumes:
       type: none
       o: bind
       device: /var/pool/nextcloud/data
+
   certs:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: /var/pool/nextcloud/certs
+
   vhost.d:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: /var/pool/nextcloud/vhost
+
   html:
     driver: local
     driver_opts:
