@@ -1,0 +1,74 @@
+version: '3'
+
+
+services:
+
+  db:
+    container_name: nextcloud-mariadb
+    build: ./db
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    environment:
+      - MYSQL_DATABASE=nextcloud
+    env_file:
+      - ./env/db.env
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+      - dbtmp:/tmp
+
+  redis:
+    container_name: nextcloud-redis
+    image: redis:alpine
+    restart: always
+    volumes:
+      - rediscache:/data
+
+  app:
+    container_name: nextcloud-app
+    build: ./app
+    depends_on:
+      - db
+      - redis
+    environment:
+      # database
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_HOST=db
+      # redis
+      - REDIS_HOST=redis
+    env_file:
+      - ./env/db.env
+      - ./env/proxy.env
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+
+  cron:
+    container_name: nextcloud-cron
+    depends_on:
+      - db
+      - redis
+    entrypoint: /cron.sh
+    image: nextcloud:fpm-alpine
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+
+  web:
+    container_name: nextcloud-nginx
+    build: ./web
+    depends_on:
+      - app
+    env_file:
+      - ./env/proxy.env
+    ports:
+      - "8080:80"
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html:ro
+
+
+volumes:
+  db:
+  dbtmp:
+  rediscache:
+  nextcloud:
