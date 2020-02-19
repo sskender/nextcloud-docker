@@ -9,6 +9,9 @@ RUN sed -i -e "s/pm\.start_servers = .*/pm.start_servers = 12/g" /usr/local/etc/
 RUN sed -i -e "s/pm\.min_spare_servers = .*/pm.min_spare_servers = 6/g" /usr/local/etc/php-fpm.d/www.conf
 RUN sed -i -e "s/pm\.max_spare_servers = .*/pm.max_spare_servers = 18/g" /usr/local/etc/php-fpm.d/www.conf
 
-# Run custom script
-ADD docker-entrypoint-custom.sh /usr/local/bin/docker-entrypoint-custom
-RUN chmod +x /usr/local/bin/docker-entrypoint-custom
+# copy custom scripts
+RUN mkdir /scripts
+ADD scripts/* /scripts/
+RUN \
+    chmod +x /scripts/*; \
+    chown -R www-data:www-data /scripts;
