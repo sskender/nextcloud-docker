@@ -12,16 +12,17 @@ services:
     env_file:
       - ./env/db.env
     restart: always
+    tmpfs:
+      - /tmp:size=256M
     volumes:
       - db:/var/lib/mysql
-      - dbtmp:/tmp
 
   redis:
     container_name: nextcloud-redis
     image: redis:alpine
     restart: always
-    volumes:
-      - rediscache:/data
+    tmpfs:
+      - /data:size=64M
 
   postfix:
     container_name: nextcloud-postfix
@@ -145,28 +146,13 @@ services:
 
 volumes:
 
-  # database volumes
+  # database volume
   db:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: /var/pool/nextcloud/db
-
-  dbtmp:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /var/ramdisk/dbcache
-
-  # redis cache volume
-  rediscache:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /var/ramdisk/rediscache
 
   # postfix mails
   mail:
