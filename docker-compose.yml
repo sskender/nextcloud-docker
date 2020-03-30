@@ -139,6 +139,7 @@ services:
     ports:
       - "3478:3478/tcp"
       - "3478:3478/udp"
+      - "49160-49200:49160-49200/udp"
     restart: always
     tmpfs:
       - /var/lib/coturn:size=512M
