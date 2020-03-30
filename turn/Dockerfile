@@ -1,13 +1,28 @@
 FROM instrumentisto/coturn:latest
 
+RUN apk \
+    --no-cache \
+    --virtual \
+    build-dependencies \
+    add \
+        openssl
+
+
 COPY turnserver.conf /etc/coturn/turnserver.conf
 
-# update auth secret
-RUN sed -i "s/north/$(openssl rand -hex 32)/" /etc/coturn/turnserver.conf
-RUN newsecret=$(grep "static-auth-secret" /etc/coturn/turnserver.conf)
-RUN echo "NEW SECRET: $newsecret"
 
-# update cli password
-#RUN sed -i "s/cli-password=CHANGE_ME/cli-password=$(openssl rand -hex 32)/" /etc/coturn/turnserver.conf
-#RUN newpassword=$(grep "cli-password" /etc/coturn/turnserver.conf)
-#RUN echo "NEW CLI PASSWORD: $newpassword"
+# update auth secret
+RUN sed -i "s/north/$(openssl rand -hex 32)/" /etc/coturn/turnserver.conf \
+ && secret=$(grep 'static-auth-secret=' /etc/coturn/turnserver.conf | \
+        cut -d'=' -f2) \
+ && echo -e "\n\nNEW SECRET: $secret\n\n"
+
+
+# replace old entrypoint
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+CMD ["--log-file=stdout"]
