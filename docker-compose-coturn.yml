@@ -1,0 +1,19 @@
+version: "3"
+
+
+services:
+
+  coturn:
+    container_name: nextcloud-coturn
+    build:
+      context: ./turn
+      dockerfile: Dockerfile
+    env_file:
+      - ./env/turn.env
+    ports:
+      - "3478:3478/tcp"
+      - "3478:3478/udp"
+    restart: always
+    tmpfs:
+      - /var/lib/coturn:size=1G
+
